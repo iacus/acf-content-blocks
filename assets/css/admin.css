@@ -1,0 +1,628 @@
+/**
+ * ACF Content Blocks – Admin Styles v2
+ * Grid cards + Modal editing, inspired by Squarespace.
+ */
+
+/* ==============================================================
+ * CSS Custom Properties
+ * ============================================================== */
+.acf-content-blocks-field {
+  --cb-bg: #ffffff;
+  --cb-bg-alt: #f7f8fa;
+  --cb-bg-hover: #f0f2f5;
+  --cb-border: #e1e3e6;
+  --cb-border-focus: #0073aa;
+  --cb-radius: 10px;
+  --cb-radius-sm: 8px;
+  --cb-shadow-sm: 0 1px 3px rgba(0,0,0,.06);
+  --cb-shadow-md: 0 4px 14px rgba(0,0,0,.08);
+  --cb-shadow-lg: 0 12px 40px rgba(0,0,0,.15);
+  --cb-text: #1e1e1e;
+  --cb-text-sec: #6b7280;
+  --cb-accent: #0073aa;
+  --cb-danger: #d63638;
+  --cb-transition: .18s ease;
+  --cb-cols: 4;
+}
+
+/* ==============================================================
+ * Grid
+ * ============================================================== */
+.acf-cb-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--cb-cols), 1fr);
+  gap: 12px;
+  padding: 4px 0;
+}
+
+/* ==============================================================
+ * Card (grid item)
+ * ============================================================== */
+.acf-cb-card {
+  position: relative;
+  background: var(--cb-bg);
+  border: 1px solid var(--cb-border);
+  border-radius: var(--cb-radius);
+  cursor: pointer;
+  transition: box-shadow var(--cb-transition), border-color var(--cb-transition), transform var(--cb-transition);
+  box-shadow: var(--cb-shadow-sm);
+  animation: cb-card-in .25s ease both;
+}
+
+/* Only clip content blocks, not the add-card (its popover must overflow). */
+.acf-cb-card:not(.acf-cb-card--add) .acf-cb-card-inner {
+  overflow: hidden;
+  border-radius: var(--cb-radius) var(--cb-radius) 0 0;
+}
+
+.acf-cb-card:hover {
+  box-shadow: var(--cb-shadow-md);
+  border-color: var(--cb-accent);
+  transform: translateY(-2px);
+}
+
+.acf-cb-card:active {
+  transform: translateY(0);
+}
+
+@keyframes cb-card-in {
+  from { opacity: 0; transform: scale(.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* --- Card inner layout --- */
+.acf-cb-card-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  min-height: 120px;
+}
+
+/* Thumbnail image */
+.acf-cb-card-thumb {
+  display: block;
+  width: 100%;
+  height: 110px;
+  object-fit: cover;
+}
+
+/* Icon fallback (no thumbnail) */
+.acf-cb-card-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  min-height: 80px;
+  background: var(--cb-bg-alt);
+}
+
+.acf-cb-card-icon .dashicons {
+  font-size: 28px;
+  width: 28px;
+  height: 28px;
+  color: #b0b5ba;
+  transition: color var(--cb-transition);
+}
+
+.acf-cb-card:hover .acf-cb-card-icon .dashicons {
+  color: var(--cb-accent);
+}
+
+/* Label area */
+.acf-cb-card-label {
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border-top: 1px solid var(--cb-border);
+  background: var(--cb-bg);
+}
+
+.acf-cb-card-type {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  color: var(--cb-text-sec);
+}
+
+.acf-cb-card-preview {
+  font-size: 12px;
+  color: var(--cb-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+}
+
+/* Drag handle (top-right corner) */
+.acf-cb-card-drag {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  background: rgba(255,255,255,.85);
+  border-radius: 6px;
+  color: #aaa;
+  cursor: grab;
+  opacity: 0;
+  transition: opacity var(--cb-transition), color var(--cb-transition);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.acf-cb-card:hover .acf-cb-card-drag {
+  opacity: 1;
+}
+
+.acf-cb-card-drag:hover {
+  color: var(--cb-text);
+  background: rgba(255,255,255,.95);
+}
+
+.acf-cb-card-drag:active {
+  cursor: grabbing;
+}
+
+/* Sortable states */
+.acf-cb-ghost {
+  opacity: .35;
+}
+
+.acf-cb-chosen {
+  box-shadow: var(--cb-shadow-lg) !important;
+  border-color: var(--cb-accent) !important;
+  z-index: 10;
+}
+
+.acf-cb-dragging {
+  box-shadow: var(--cb-shadow-lg);
+}
+
+/* ==============================================================
+ * Add Card (the "+" tile)
+ * ============================================================== */
+.acf-cb-card--add {
+  border: 2px dashed var(--cb-border);
+  background: var(--cb-bg-alt);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 120px;
+  box-shadow: none;
+  cursor: default;
+  position: relative;
+  overflow: visible;          /* allow type-picker popover to overflow */
+}
+
+.acf-cb-card--add:hover {
+  border-color: var(--cb-accent);
+  box-shadow: none;
+  transform: none;
+}
+
+.acf-cb-add-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border: none;
+  border-radius: 50%;
+  background: var(--cb-bg);
+  color: var(--cb-text-sec);
+  cursor: pointer;
+  box-shadow: var(--cb-shadow-sm);
+  transition: all var(--cb-transition);
+}
+
+.acf-cb-add-trigger:hover {
+  color: var(--cb-accent);
+  box-shadow: var(--cb-shadow-md);
+  transform: scale(1.08);
+}
+
+.acf-cb-add-trigger:active {
+  transform: scale(1);
+}
+
+/* ==============================================================
+ * Type Picker Popover
+ * ============================================================== */
+.acf-cb-type-picker {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--cb-bg);
+  border: 1px solid var(--cb-border);
+  border-radius: var(--cb-radius);
+  box-shadow: var(--cb-shadow-lg);
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 170px;
+  z-index: 100;
+}
+
+.acf-cb-type-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: none;
+  border-radius: var(--cb-radius-sm);
+  background: transparent;
+  color: var(--cb-text);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background var(--cb-transition);
+  text-align: left;
+  white-space: nowrap;
+  font-family: inherit;
+}
+
+.acf-cb-type-btn:hover {
+  background: var(--cb-bg-hover);
+}
+
+.acf-cb-type-btn .dashicons {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  line-height: 18px;
+  color: var(--cb-accent);
+}
+
+/* ==============================================================
+ * Type Picker – Separator & Bulk images button
+ * ============================================================== */
+.acf-cb-type-picker-sep {
+  height: 1px;
+  background: var(--cb-border);
+  margin: 4px 0;
+}
+
+.acf-cb-type-btn--bulk-images {
+  color: var(--cb-accent) !important;
+  font-weight: 600 !important;
+}
+
+.acf-cb-type-btn--bulk-images .dashicons {
+  color: var(--cb-accent);
+}
+
+.acf-cb-type-btn--bulk-images:hover {
+  background: rgba(0, 115, 170, .08) !important;
+}
+
+/* ==============================================================
+ * Modal Overlay
+ * ============================================================== */
+.acf-cb-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 160000;             /* above WP admin bars & ACF overlays */
+  background: rgba(0, 0, 0, .45);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+body.acf-cb-modal-open {
+  overflow: hidden !important;
+}
+
+/* ==============================================================
+ * Modal
+ * ============================================================== */
+.acf-cb-modal {
+  background: var(--cb-bg);
+  border-radius: 14px;
+  width: 100%;
+  max-width: 600px;
+  max-height: calc(100vh - 48px);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0,0,0,.25);
+  animation: cb-modal-in .25s ease both;
+  overflow: hidden;
+}
+
+@keyframes cb-modal-in {
+  from { opacity: 0; transform: translateY(20px) scale(.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* --- Modal header --- */
+.acf-cb-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--cb-border);
+  flex-shrink: 0;
+}
+
+.acf-cb-modal-type-icon .dashicons {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  color: var(--cb-accent);
+}
+
+.acf-cb-modal-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--cb-text);
+  flex: 1;
+}
+
+.acf-cb-modal-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--cb-text-sec);
+  cursor: pointer;
+  transition: all var(--cb-transition);
+}
+
+.acf-cb-modal-close:hover {
+  background: var(--cb-bg-hover);
+  color: var(--cb-text);
+}
+
+/* --- Modal body --- */
+.acf-cb-modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+/* --- Modal footer --- */
+.acf-cb-modal-footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 20px;
+  border-top: 1px solid var(--cb-border);
+  flex-shrink: 0;
+}
+
+.acf-cb-modal-footer .acf-cb-modal-delete {
+  color: var(--cb-danger) !important;
+  border-color: var(--cb-danger) !important;
+}
+
+.acf-cb-modal-footer .acf-cb-modal-delete:hover {
+  background: #fef2f2 !important;
+}
+
+.acf-cb-modal-footer .acf-cb-modal-done {
+  margin-left: auto;
+}
+
+/* ==============================================================
+ * Modal – Shared input styles
+ * ============================================================== */
+.acf-cb-m-input {
+  display: block;
+  width: 100%;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--cb-text);
+  background: var(--cb-bg);
+  border: 1px solid var(--cb-border);
+  border-radius: var(--cb-radius-sm);
+  padding: 10px 14px;
+  transition: border-color var(--cb-transition), box-shadow var(--cb-transition);
+  box-sizing: border-box;
+  resize: vertical;
+}
+
+.acf-cb-m-input:focus {
+  outline: none;
+  border-color: var(--cb-accent);
+  box-shadow: 0 0 0 2px rgba(0,115,170,.15);
+}
+
+.acf-cb-m-input::placeholder {
+  color: #a0a5aa;
+}
+
+/* --- Text block --- */
+.acf-cb-m-text {
+  min-height: 180px;
+}
+
+/* --- Image block (modal) --- */
+.acf-cb-m-image {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.acf-cb-m-image-preview {
+  position: relative;
+  border: 2px dashed var(--cb-border);
+  border-radius: var(--cb-radius);
+  overflow: hidden;
+  cursor: pointer;
+  min-height: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--cb-bg-alt);
+  transition: border-color var(--cb-transition);
+}
+
+.acf-cb-m-image-preview:hover {
+  border-color: var(--cb-accent);
+}
+
+.acf-cb-m-image-preview.has-image {
+  border-style: solid;
+  border-color: var(--cb-border);
+  min-height: auto;
+}
+
+.acf-cb-m-image-preview img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+
+.acf-cb-m-image-preview.has-image .acf-cb-m-image-empty {
+  display: none;
+}
+
+.acf-cb-m-image-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  color: var(--cb-text-sec);
+  padding: 28px;
+}
+
+.acf-cb-m-image-empty .dashicons {
+  font-size: 36px;
+  width: 36px;
+  height: 36px;
+  color: #c3c6ca;
+}
+
+.acf-cb-m-image-empty span:last-child {
+  font-size: 13px;
+}
+
+.acf-cb-m-image-btns {
+  display: flex;
+  gap: 8px;
+}
+
+/* --- Video block (modal) --- */
+.acf-cb-m-video-preview {
+  border-radius: var(--cb-radius);
+  overflow: hidden;
+  margin-top: 10px;
+}
+
+.acf-cb-m-video-preview:empty {
+  display: none;
+}
+
+.acf-cb-modal-body .acf-cb-m-video-url {
+  margin-bottom: 0;
+}
+
+.acf-cb-modal-body .acf-cb-m-caption {
+  margin-top: 12px;
+}
+
+/* --- Quote block (modal) --- */
+.acf-cb-m-quote-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-left: 18px;
+  position: relative;
+}
+
+.acf-cb-m-quote-wrap::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  border-radius: 2px;
+  background: var(--cb-accent);
+}
+
+.acf-cb-m-quote-wrap .acf-cb-m-quote {
+  font-style: italic;
+  font-size: 15px;
+  min-height: 120px;
+}
+
+.acf-cb-m-quote-wrap .acf-cb-m-author {
+  max-width: 280px;
+  font-weight: 500;
+}
+
+/* --- HTML block (modal) --- */
+.acf-cb-m-html {
+  font-family: "SF Mono", "Fira Code", "Fira Mono", "Consolas", monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  background: #1e1e2e;
+  color: #cdd6f4;
+  border-color: #313244;
+  min-height: 200px;
+  tab-size: 4;
+}
+
+.acf-cb-m-html:focus {
+  border-color: var(--cb-accent);
+  box-shadow: 0 0 0 2px rgba(0,115,170,.15);
+}
+
+.acf-cb-m-html::placeholder {
+  color: #6c7086;
+}
+
+/* ==============================================================
+ * Responsive
+ * ============================================================== */
+@media (max-width: 960px) {
+  .acf-cb-grid {
+    --cb-cols: 3 !important;
+  }
+}
+
+@media (max-width: 680px) {
+  .acf-cb-grid {
+    --cb-cols: 2 !important;
+  }
+  .acf-cb-modal {
+    max-width: 100%;
+    border-radius: 10px;
+  }
+  .acf-cb-modal-overlay {
+    padding: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .acf-cb-card-inner {
+    min-height: 90px;
+  }
+  .acf-cb-card-thumb {
+    height: 80px;
+  }
+}
+
+/* ==============================================================
+ * ACF wrapper reset
+ * ============================================================== */
+.acf-field-content-blocks .acf-input {
+  padding: 0;
+}

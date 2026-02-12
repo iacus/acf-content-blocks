@@ -94,6 +94,68 @@ Use the standard ACF `get_field()` function to retrieve the blocks:
     endif;
     ?>
 
+== Usage with Timber / Twig ==
+
+If you use [Timber](https://upstatement.com/timber/) you can access the blocks via `post.meta()` and loop through them in your Twig templates. Each block exposes `type`, `content`, and `meta`:
+
+    {% for block in post.meta('my_content_blocks') %}
+
+        {% if block.type == 'text' %}
+            <div class="block-text">
+                {{ block.content }}
+            </div>
+
+        {% elseif block.type == 'image' %}
+            <figure class="block-image">
+                <img
+                    src="{{ block.meta.image_url }}"
+                    alt="{{ block.meta.image_alt }}"
+                    srcset="{{ block.meta.image_srcset }}"
+                    sizes="{{ block.meta.image_sizes }}"
+                />
+                {% if block.meta.caption %}
+                    <figcaption>{{ block.meta.caption }}</figcaption>
+                {% endif %}
+            </figure>
+
+        {% elseif block.type == 'video' %}
+            <div class="block-video">
+                {{ function('wp_oembed_get', block.content) }}
+            </div>
+
+        {% elseif block.type == 'quote' %}
+            <blockquote class="block-quote">
+                <p>{{ block.content }}</p>
+                {% if block.meta.author %}
+                    <cite>{{ block.meta.author }}</cite>
+                {% endif %}
+            </blockquote>
+
+        {% elseif block.type == 'html' %}
+            <div class="block-html">
+                {{ block.content }}
+            </div>
+
+        {% endif %}
+
+    {% endfor %}
+
+You can also use Timber's `TimberImage` to get a full image object:
+
+    {% set img = TimberImage(block.meta.image_id) %}
+    <img src="{{ img.src }}" alt="{{ img.alt }}" />
+
+= Data structure reference =
+
+Each block in the array has the following shape:
+
+* `block.type` – One of: `text`, `image`, `video`, `quote`, `html`
+* `block.content` – Main content (text body, video URL, quote text, HTML code). Empty for `image` blocks.
+* `block.meta` – Additional metadata depending on the type:
+    * **image**: `image_id`, `image_url`, `image_srcset`, `image_sizes`, `image_alt`, `caption`
+    * **video**: `caption`
+    * **quote**: `author`
+
 == Frequently Asked Questions ==
 
 = Does this modify ACF core? =

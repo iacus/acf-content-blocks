@@ -1,5 +1,5 @@
 === ACF Content Blocks ===
-Contributors: acfcontentblocks
+Contributors: Novagarda
 Tags: acf, advanced custom fields, content blocks, drag and drop, page builder
 Requires at least: 5.8
 Tested up to: 6.7

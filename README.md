@@ -4,7 +4,7 @@ A custom ACF field type that allows creating mixed content blocks (text, image, 
 
 | | |
 |---|---|
-| **Contributors** | acfcontentblocks |
+| **Contributors** | Novagarda |
 | **Requires at least** | WordPress 5.8 |
 | **Tested up to** | 6.7 |
 | **Requires PHP** | 7.4+ |

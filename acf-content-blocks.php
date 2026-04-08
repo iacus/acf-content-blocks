@@ -4,8 +4,8 @@
  * Plugin URI: https://github.com/acf-content-blocks
  * Description: A powerful ACF field type that allows creating mixed content blocks (text, image, video, quote, HTML) with drag & drop reordering. Inspired by Squarespace's content editor.
  * Version: 1.0.0
- * Author: ACF Content Blocks
- * Author URI: https://github.com/acf-content-blocks
+ * Author: Novagarda
+ * Author URI: https://github.com/Novagarda
  * License: GPL-2.0+
  * License URI: http://www.gnu.org/licenses/gpl-2.0.txt
  * Text Domain: acf-content-blocks

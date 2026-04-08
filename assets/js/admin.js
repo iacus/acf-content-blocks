@@ -157,7 +157,14 @@
         break;
 
       case "video":
+        var videoId = meta.video_id ? parseInt(meta.video_id) : 0;
         h += '<input type="url" class="acf-cb-m-input acf-cb-m-video-url" placeholder="' + I.enterUrl + '" value="' + escAttr(content) + '"/>';
+        h += '<div class="acf-cb-m-image acf-cb-m-video" data-video-id="' + videoId + '">';
+        h += '  <div class="acf-cb-m-image-btns">';
+        h += '    <button type="button" class="button acf-cb-m-pick-video">' + (videoId ? I.changeVideo : I.selectVideo) + "</button>";
+        h += '    <button type="button" class="button acf-cb-m-remove-video"' + (!videoId ? ' style="display:none"' : "") + ">" + I.removeVideo + "</button>";
+        h += "  </div>";
+        h += "</div>";
         h += '<div class="acf-cb-m-video-preview">' + videoEmbed(content) + "</div>";
         h += '<input type="text" class="acf-cb-m-input acf-cb-m-caption" placeholder="' + I.caption + '" value="' + escAttr(meta.caption || "") + '"/>';
         break;
@@ -191,6 +198,7 @@
         break;
       case "video":
         data.content = $modal.find(".acf-cb-m-video-url").val() || "";
+        data.meta.video_id = parseInt($modal.find(".acf-cb-m-video").data("video-id") || 0);
         data.meta.caption = $modal.find(".acf-cb-m-caption").val() || "";
         break;
       case "quote":
@@ -346,11 +354,15 @@
 
       // Bind live video preview.
       $modal.find(".acf-cb-m-video-url").on("input", debounce(function () {
+        $modal.find(".acf-cb-m-video").data("video-id", 0);
+        $modal.find(".acf-cb-m-pick-video").text(I.selectVideo);
+        $modal.find(".acf-cb-m-remove-video").hide();
         $modal.find(".acf-cb-m-video-preview").html(videoEmbed($(this).val()));
       }, 500));
 
       // Image picker.
       bindImagePicker($modal, $field);
+      bindVideoPicker($modal);
     }
 
     /* ---------- Close modal → save back to card ---------- */
@@ -440,6 +452,43 @@
       $wrap.data("image-id", 0);
       $wrap.find(".acf-cb-m-image-preview").removeClass("has-image").find("img").remove();
       $wrap.find(".acf-cb-m-pick-image").text(acfCB.i18n.selectImage);
+      $(this).hide();
+    });
+  }
+
+  /* ==============================================================
+   * Video picker (inside modal)
+   * ============================================================== */
+  function bindVideoPicker($modal) {
+    $modal.find(".acf-cb-m-pick-video").off("click.acfcb").on("click.acfcb", function (e) {
+      e.preventDefault();
+      var $wrap = $modal.find(".acf-cb-m-video");
+
+      var frame = wp.media({
+        title: I.selectVideo,
+        multiple: false,
+        library: { type: "video" },
+        button: { text: I.selectVideo },
+      });
+
+      frame.on("select", function () {
+        var att = frame.state().get("selection").first().toJSON();
+        var url = att.url || "";
+        $wrap.data("video-id", att.id || 0);
+        $modal.find(".acf-cb-m-video-url").val(url).trigger("input");
+        $wrap.find(".acf-cb-m-pick-video").text(I.changeVideo);
+        $wrap.find(".acf-cb-m-remove-video").show();
+      });
+
+      frame.open();
+    });
+
+    $modal.find(".acf-cb-m-remove-video").off("click.acfcb").on("click.acfcb", function (e) {
+      e.preventDefault();
+      var $wrap = $modal.find(".acf-cb-m-video");
+      $wrap.data("video-id", 0);
+      $modal.find(".acf-cb-m-video-url").val("").trigger("input");
+      $wrap.find(".acf-cb-m-pick-video").text(I.selectVideo);
       $(this).hide();
     });
   }

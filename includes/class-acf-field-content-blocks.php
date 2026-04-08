@@ -78,6 +78,9 @@ class ACF_Field_Content_Blocks extends acf_field {
                 'selectImage'   => __( 'Select Image', 'acf-content-blocks' ),
                 'changeImage'   => __( 'Change Image', 'acf-content-blocks' ),
                 'removeImage'   => __( 'Remove Image', 'acf-content-blocks' ),
+                'selectVideo'   => __( 'Select Video', 'acf-content-blocks' ),
+                'changeVideo'   => __( 'Change Video', 'acf-content-blocks' ),
+                'removeVideo'   => __( 'Remove Video', 'acf-content-blocks' ),
                 'done'          => __( 'Done', 'acf-content-blocks' ),
                 'delete'        => __( 'Delete', 'acf-content-blocks' ),
                 'duplicate'     => __( 'Duplicate', 'acf-content-blocks' ),
@@ -368,6 +371,10 @@ class ACF_Field_Content_Blocks extends acf_field {
                     break;
                 case 'video':
                     $content = esc_url_raw( $content );
+                    $meta['video_id'] = isset( $meta['video_id'] ) ? absint( $meta['video_id'] ) : 0;
+                    if ( ! $content && ! empty( $meta['video_id'] ) ) {
+                        $content = wp_get_attachment_url( $meta['video_id'] );
+                    }
                     $meta['caption'] = isset( $meta['caption'] ) ? sanitize_text_field( $meta['caption'] ) : '';
                     break;
                 case 'quote':
@@ -398,6 +405,12 @@ class ACF_Field_Content_Blocks extends acf_field {
                 $block['meta']['image_srcset'] = wp_get_attachment_image_srcset( $id, 'full' );
                 $block['meta']['image_sizes']  = wp_get_attachment_image_sizes( $id, 'full' );
                 $block['meta']['image_alt']    = get_post_meta( $id, '_wp_attachment_image_alt', true );
+            }
+            if ( 'video' === $block['type'] && ! empty( $block['meta']['video_id'] ) ) {
+                $video_id = intval( $block['meta']['video_id'] );
+                if ( empty( $block['content'] ) ) {
+                    $block['content'] = wp_get_attachment_url( $video_id );
+                }
             }
         }
         return $value;
